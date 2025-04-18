@@ -291,7 +291,12 @@ int main(int argc, char ** argv)
    std::string base_name = trace_path.substr(filename_start, 
                                                                (dot_pos != std::string::npos && dot_pos > filename_start) 
                                                                ? dot_pos - filename_start : std::string::npos);
+#ifdef TAGE
    std::string misp_log_filename = "tage/" + base_name + "_branch_misps.csv";
+#else
+   std::string misp_log_filename = "tagescl/" + base_name + "_branch_misps.csv";
+#endif
+
    g_misp_logger = new MispredictionLogger(misp_log_filename.c_str());
  
   // Get to next (optional) argument after trace filename.

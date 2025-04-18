@@ -28,6 +28,9 @@ TOP = ..
 INC = -I$(TOP) -I$(TOP)/lib
 LIBS =
 DEFINES = -DGZSTREAM_NAMESPACE=gz
+ifeq ($(TAGE), 1)
+    DEFINES += -DTAGE
+endif
 FLAGS = -std=c++17 $(INC) $(LIBS) $(OPT) $(DEFINES)
 
 ifeq ($(DEBUG), 1)
