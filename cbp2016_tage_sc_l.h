@@ -25,8 +25,8 @@
 //To get the predictor storage budget on stderr  uncomment the next line
 //#define PRINTSIZE
 
-#define SC          // 8.2 % if TAGE alone
-#define IMLI            // 0.2 %
+// #define SC          // 8.2 % if TAGE alone
+// #define IMLI            // 0.2 %
 #define LOCALH
 
 #ifdef LOCALH           // 2.7 %

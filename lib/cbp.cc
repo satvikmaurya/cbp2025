@@ -35,6 +35,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "resource_schedule.h"
 #include "uarchsim.h"
 #include "parameters.h"
+#include "misp_logger.h"
 
 uarchsim_t *sim;
 
@@ -281,6 +282,17 @@ int main(int argc, char ** argv)
 
   // Need to create simulator after parsing arguments (for global parameters).
   sim = new uarchsim_t;
+
+   // Extract the trace filename from argv[i] to create a unique log filename
+   std::string trace_path(argv[i]);
+   size_t last_slash = trace_path.find_last_of("/\\");
+   size_t filename_start = (last_slash == std::string::npos) ? 0 : last_slash + 1;
+   size_t dot_pos = trace_path.find_last_of('.');
+   std::string base_name = trace_path.substr(filename_start, 
+                                                               (dot_pos != std::string::npos && dot_pos > filename_start) 
+                                                               ? dot_pos - filename_start : std::string::npos);
+   std::string misp_log_filename = "tage/" + base_name + "_branch_misps.csv";
+   g_misp_logger = new MispredictionLogger(misp_log_filename.c_str());
  
   // Get to next (optional) argument after trace filename.
   i++;
@@ -324,4 +336,6 @@ int main(int argc, char ** argv)
   endPredictor();
   endCondDirPredictor();
   sim->output();
+
+  delete g_misp_logger;
 }

@@ -1,7 +1,10 @@
 #ifndef _PREDICTOR_H_
 #define _PREDICTOR_H_
 
+#include <cassert>
+#include <cstdint>
 #include <stdlib.h>
+#include <unordered_map>
 
 struct SampleHist
 {
