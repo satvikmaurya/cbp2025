@@ -37,6 +37,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "parameters.h"
 #include "misp_logger.h"
 
+#define DUMP
+
 uarchsim_t *sim;
 
 int parseargs(int argc, char ** argv) 
@@ -282,7 +284,7 @@ int main(int argc, char ** argv)
 
   // Need to create simulator after parsing arguments (for global parameters).
   sim = new uarchsim_t;
-
+#ifdef DUMP
    // Extract the trace filename from argv[i] to create a unique log filename
    std::string trace_path(argv[i]);
    size_t last_slash = trace_path.find_last_of("/\\");
@@ -295,6 +297,7 @@ int main(int argc, char ** argv)
    std::string misp_log_filename = "tage/" + base_name + "_branch_misps.csv";
 #else
    std::string misp_log_filename = "tagescl/" + base_name + "_branch_misps.csv";
+#endif
 #endif
 
    g_misp_logger = new MispredictionLogger(misp_log_filename.c_str());

@@ -19,7 +19,27 @@
 #include "lib/sim_common_structs.h"
 #include "cbp2016_tage_sc_l.h"
 #include "my_cond_branch_predictor.h"
+#include <algorithm>
 #include <cassert>
+#include <cstdint>
+#include <cstdlib>
+#include <sys/types.h>
+#include <unordered_map>
+#include <vector>
+#include <iostream>
+
+static std::unordered_map<uint64_t, std::vector<int8_t>> perceptron_features; // Stores the last seen features for every branch prior to predict, used later during updates.
+
+void get_features(std::vector<int8_t>& features, bool tage_sc_l_pred) {
+    // int8_t lsum = std::min<int8_t>(15, floor(log2(abs(lsum))));
+    // int8_t tage_ctr = gtable[cbp2016_tage_sc_l.HitBank][cbp2016_tage_sc_l.GI[cbp2016_tage_sc_l.HitBank]].ctr;
+    // int8_t loop_ctr = cbp2016_tage_sc_l.active_hist.WITHLOOP;
+
+    features.push_back((int8_t) tage_sc_l_pred);
+    // features.push_back(tage_ctr);
+    // features.push_back(lsum);
+    // features.push_back(loop_ctr);
+}
 
 //
 // beginCondDirPredictor()
@@ -54,7 +74,14 @@ void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint6
 bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 {
     const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
-    const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+    
+    // Create feature array with all predictor elements
+    std::vector<int8_t> features;
+    get_features(features, tage_sc_l_pred);
+    perceptron_features[(seq_no << 4) | (piece & 0x000F)] = features;
+
+    // Pass the feature array to the predictor
+    const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred, features);
     return my_prediction;
 }
 
@@ -144,8 +171,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
         {
             const bool _resolve_dir = _exec_info.taken.value();
             const uint64_t _next_pc = _exec_info.next_pc;
+            std::vector<int8_t> features;
+            auto it = perceptron_features.find((seq_no << 4) | (piece & 0x000F));
+            if(it != perceptron_features.end())
+            {
+                features = it->second;
+                perceptron_features.erase(it);
+            } else {
+                std::cerr << "Error: Features not found for PC: " << pc << std::endl;
+                exit(1);
+            }
             cbp2016_tage_sc_l.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
-            cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
+            cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc, features);
         }
         else
         {
