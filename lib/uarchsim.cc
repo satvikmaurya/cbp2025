@@ -37,6 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "resource_schedule.h"
 #include "uarchsim.h"
 #include "parameters.h"
+#include "misp_logger.h"
 
 //uarchsim_t::uarchsim_t():window(WINDOW_SIZE),
 uarchsim_t::uarchsim_t()
@@ -505,6 +506,9 @@ void uarchsim_t::step(db_t *inst)
    const uint64_t agen_cycle = is_mem(inst->insn_class) ? (exec_cycle + 1) : UINT64_MAX;
 
    if (inst->is_load) {
+
+      // Log
+      g_misp_logger->log_misprediction(seq_no, piece, inst->pc, inst->next_pc, inst->addr, 1, false, false);
      
       latency = exec_cycle; // record start of execution
 
@@ -784,6 +788,8 @@ void uarchsim_t::step(db_t *inst)
        if(is_cond_br(inst->insn_class))
        {
            predicted_taken = br_mispred ? !_current_execute_info.taken.value() : _current_execute_info.taken.value();
+           // Log
+           g_misp_logger->log_misprediction(seq_no, piece, inst->pc, inst->next_pc, inst->addr, 0, _current_execute_info.taken.value(), predicted_taken);
        }
        else
        {

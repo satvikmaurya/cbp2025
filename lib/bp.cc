@@ -101,21 +101,6 @@ bool bp_t::predict(uint64_t seq_no, uint8_t piece, InstClass inst_class, uint64_
               pred_taken =  taken;
           }
       }
-
-      if (1) {
-         // Get global history from the predictor
-         uint64_t global_hist = 0;
-         int confidence = 0;
-         uint64_t local_hist = 0;
-         
-         g_misp_logger->log_misprediction(
-             seq_no, piece, pc, next_pc,
-             1, // 1 = conditional branch
-             taken, pred_taken,
-             global_hist, pred_cycle,
-             local_hist, confidence
-         );
-      }
       
       /* A. Seznec: uodate TAGE-SC-L*/
       //TAGESCL-> UpdatePredictor (pc , 1,  taken, pred_taken, next_pc);

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <cstdint>
+#include <sys/types.h>
 
 class MispredictionLogger {
 private:
@@ -17,8 +18,7 @@ public:
         
         // Write CSV header
         if (enabled) {
-            logfile << "seq_no,piece,pc,next_pc,branch_type,actual,predicted,";
-            logfile << "global_hist,cycle,local_hist,confidence\n";
+            logfile << "seq_no,piece,pc,next_pc,address,inst_type,actual,predicted\n";
         }
     }
     
@@ -27,17 +27,13 @@ public:
     }
     
     void log_misprediction(
-        uint64_t seq_no, uint8_t piece, uint64_t pc, uint64_t next_pc,
-        int branch_type, bool actual_outcome, bool predicted_outcome,
-        uint64_t global_hist, uint64_t cycle,
-        uint64_t local_hist = 0, int confidence = 0) {
+        uint64_t seq_no, uint8_t piece, uint64_t pc, uint64_t next_pc, uint64_t address,
+        int inst_type, bool actual_outcome, bool predicted_outcome) {
         
         if (!enabled) return;
         
-        logfile << seq_no << "," << (int)piece << ",0x" << std::hex << pc << ",0x" << next_pc << std::dec << ",";
-        logfile << branch_type << "," << actual_outcome << "," << predicted_outcome << ",";
-        logfile << "0x" << std::hex << global_hist << std::dec << "," << cycle << ",";
-        logfile << "0x" << std::hex << local_hist << std::dec << "," << confidence << "\n";
+        logfile << seq_no << "," << (int)piece << ",0x" << std::hex << pc << ",0x" << next_pc << ",0x" << address << std::dec << ",";
+        logfile << inst_type << "," << actual_outcome << "," << predicted_outcome << "\n";
         
         // Ensure data is flushed to file
         logfile.flush();

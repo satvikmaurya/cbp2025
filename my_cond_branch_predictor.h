@@ -11,7 +11,7 @@
 #include <vector>
 #include <algorithm>
 
-#define USE_PERCEPTRON
+// #define USE_PERCEPTRON
 #define PERCEPTRON_SIZE 1024
 #define GHIST_LEN 63
 
@@ -75,19 +75,19 @@ public:
         //     return;
         // }
 
-        int sum = _bias;
-        for (int i = 0; i < GHIST_LEN; i++) {
-            sum += (ghr[i] > 0) ? _weights[i] : -_weights[i];
-        }
-        for (int i = 0; i < LHIST_LEN; i++) {
-            sum += (_lhist[i] > 0) ? _weights[GHIST_LEN + i] : -_weights[GHIST_LEN + i];
-        }
+        // int sum = _bias;
+        // for (int i = 0; i < GHIST_LEN; i++) {
+        //     sum += (ghr[i] > 0) ? _weights[i] : -_weights[i];
+        // }
+        // for (int i = 0; i < LHIST_LEN; i++) {
+        //     sum += (_lhist[i] > 0) ? _weights[GHIST_LEN + i] : -_weights[GHIST_LEN + i];
+        // }
 
-        if(tagescl == taken) {
-            _lhist = (_lhist << 1);
-            _lhist.set(0, taken);
-            return;
-        }
+        // if(tagescl == taken) {
+        //     _lhist = (_lhist << 1);
+        //     _lhist.set(0, taken);
+        //     return;
+        // }
 
         int direction = (taken) ? 1 : -1;
         _bias = sat_add(_bias, direction);
@@ -138,7 +138,7 @@ class metaPerceptron {
         int8_t _bias;
         int8_t sat_cnt;
     
-        metaPerceptron() : _bias(0), sat_cnt(0) {
+        metaPerceptron() : _bias(0), sat_cnt(1) {
             for (int i = 0; i < NUM_WEIGHTS; ++i) {
                 _weights[i] = 0;
             }
@@ -201,11 +201,11 @@ public:
 
     void update(uint64_t PC, int8_t* features, bool taken, bool prediction, bool perceptron_pred) {
         count++;
-        if(taken == prediction) {
-            _ghr = (_ghr << 1);
-            _ghr.set(0, taken);
-            return;
-        }
+        // if(taken == prediction) {
+        //     _ghr = (_ghr << 1);
+        //     _ghr.set(0, taken);
+        //     return;
+        // }
 
         uint64_t pc_idx = hash(PC);
         _table[pc_idx].update(features, taken, prediction, perceptron_pred);
